@@ -13,7 +13,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 
 from orchestrator import Orchestrator
-from database import ensure_db_initialized
+from database import ensure_db_initialized, get_history, get_run_artifact
 
 # Load environment variables
 load_dotenv()
@@ -129,7 +129,7 @@ def generate():
 
 
 @app.route('/api/history', methods=['GET'])
-def get_history():
+def api_get_history():
     """
     Retrieve run history.
     
@@ -144,7 +144,7 @@ def get_history():
         user_id = request.args.get('user_id')
         limit = request.args.get('limit', 50, type=int)
         
-        artifacts = database.get_history(user_id, limit)
+        artifacts = get_history(user_id, limit)
         
         return jsonify({
             'success': True,
@@ -169,7 +169,7 @@ def get_run(run_id):
         Complete RunArtifact
     """
     try:
-        artifact = database.get_run_artifact(run_id)
+        artifact = get_run_artifact(run_id)
         
         if not artifact:
             return jsonify({
