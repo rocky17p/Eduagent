@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Educational Content Generator</title>
+    <meta name="description" content="Generate grade-appropriate educational content using AI agents">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-gradient"></div>
+    
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🎓</span>
+                <h1>EduGen AI</h1>
+            </div>
+            <p class="tagline">Intelligent Educational Content Generator</p>
+        </header>
+
+        <!-- Input Form -->
+        <section class="input-section glass-card">
+            <h2 class="section-title">
+                <span class="step-badge">1</span>
+                Configure Content
+            </h2>
+            <form id="generateForm">
+                <div class="form-group">
+                    <label for="grade">Grade Level</label>
+                    <select id="grade" name="grade" required>
+                        <option value="">Select Grade</option>
+                        <option value="1">Grade 1</option>
+                        <option value="2">Grade 2</option>
+                        <option value="3">Grade 3</option>
+                        <option value="4" selected>Grade 4</option>
+                        <option value="5">Grade 5</option>
+                        <option value="6">Grade 6</option>
+                        <option value="7">Grade 7</option>
+                        <option value="8">Grade 8</option>
+                        <option value="9">Grade 9</option>
+                        <option value="10">Grade 10</option>
+                        <option value="11">Grade 11</option>
+                        <option value="12">Grade 12</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="topic">Topic</label>
+                    <input type="text" id="topic" name="topic" placeholder="e.g., Types of angles" value="Types of angles" required>
+                </div>
+                <button type="submit" class="btn-generate" id="generateBtn">
+                    <span class="btn-text">Generate Content</span>
+                    <span class="btn-loader" style="display: none;">
+                        <span class="spinner"></span>
+                        Processing...
+                    </span>
+                </button>
+            </form>
+        </section>
+
+        <!-- Agent Pipeline Flow -->
+        <div class="pipeline-flow" id="pipelineFlow" style="display: none;">
+            <div class="flow-arrow">
+                <span class="arrow-line"></span>
+                <span class="arrow-head">▼</span>
+            </div>
+        </div>
+
+        <!-- Generator Output -->
+        <section class="output-section glass-card" id="generatorSection" style="display: none;">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="step-badge agent-badge">🤖</span>
+                    Generator Agent Output
+                </h2>
+                <span class="status-badge" id="generatorStatus">Initial Draft</span>
+            </div>
+            
+            <div class="content-block">
+                <h3>📚 Explanation</h3>
+                <div class="explanation-content" id="explanationContent"></div>
+            </div>
+            
+            <div class="content-block">
+                <h3>📝 Multiple Choice Questions</h3>
+                <div class="mcqs-container" id="mcqsContent"></div>
+            </div>
+        </section>
+
+        <!-- Pipeline Arrow -->
+        <div class="pipeline-flow" id="reviewerFlow" style="display: none;">
+            <div class="flow-arrow">
+                <span class="arrow-line"></span>
+                <span class="arrow-head">▼</span>
+            </div>
+        </div>
+
+        <!-- Reviewer Output -->
+        <section class="output-section glass-card" id="reviewerSection" style="display: none;">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="step-badge agent-badge">🔍</span>
+                    Reviewer Agent Feedback
+                </h2>
+                <span class="status-badge" id="reviewerStatusBadge">Evaluating</span>
+            </div>
+            
+            <div class="review-status" id="reviewStatus"></div>
+            <div class="feedback-list" id="feedbackContent"></div>
+        </section>
+
+        <!-- Refinement Arrow -->
+        <div class="pipeline-flow" id="refinementFlow" style="display: none;">
+            <div class="flow-arrow refinement-arrow">
+                <span class="arrow-line"></span>
+                <span class="arrow-head">▼</span>
+                <span class="refinement-label">Refinement Pass</span>
+            </div>
+        </div>
+
+        <!-- Refined Output -->
+        <section class="output-section glass-card refined-section" id="refinedSection" style="display: none;">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="step-badge agent-badge">✨</span>
+                    Refined Output
+                </h2>
+                <span class="status-badge refined-badge">Improved</span>
+            </div>
+            
+            <div class="content-block">
+                <h3>📚 Refined Explanation</h3>
+                <div class="explanation-content" id="refinedExplanationContent"></div>
+            </div>
+            
+            <div class="content-block">
+                <h3>📝 Refined MCQs</h3>
+                <div class="mcqs-container" id="refinedMcqsContent"></div>
+            </div>
+        </section>
+
+        <!-- Error Display -->
+        <section class="error-section glass-card" id="errorSection" style="display: none;">
+            <div class="error-icon">⚠️</div>
+            <h3>Error Occurred</h3>
+            <p id="errorMessage"></p>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Built with AI Agents • Generator + Reviewer Pipeline</p>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
