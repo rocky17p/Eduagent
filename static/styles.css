@@ -619,3 +619,425 @@ body {
         margin-top: 0.5rem;
     }
 }
+
+/* ============================================
+   Part 2: Scores Grid, Teacher Notes, Feedback
+   ============================================ */
+
+/* Scores Grid */
+.scores-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-top: 1rem;
+    width: 100%;
+}
+
+.score-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0.875rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+}
+
+.score-item.high {
+    background: var(--success-bg);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.score-item.medium {
+    background: var(--warning-bg);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.score-item.low {
+    background: var(--error-bg);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.score-emoji {
+    font-size: 1rem;
+}
+
+.score-label {
+    flex: 1;
+    color: var(--text-secondary);
+}
+
+.score-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.score-item.high .score-value { color: var(--success); }
+.score-item.medium .score-value { color: var(--warning); }
+.score-item.low .score-value { color: var(--error); }
+
+/* Teacher Notes */
+.teacher-notes {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: var(--radius-md);
+}
+
+.teacher-notes h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    margin-bottom: 1rem;
+}
+
+.teacher-notes-content {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+.teacher-notes-content p {
+    margin-bottom: 0.75rem;
+}
+
+.teacher-notes-content ul {
+    margin-left: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.teacher-notes-content li {
+    margin-bottom: 0.25rem;
+}
+
+/* Enhanced Feedback Items */
+.feedback-item {
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.feedback-field {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    background: rgba(99, 102, 241, 0.15);
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+    margin-bottom: 0.25rem;
+    font-family: monospace;
+}
+
+.feedback-issue {
+    color: var(--text-secondary);
+}
+
+.no-feedback {
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: 1rem;
+}
+
+/* Responsive scores grid */
+@media (max-width: 480px) {
+    .scores-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   Tabs Navigation
+   ============================================ */
+
+.tabs-container {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0.25rem;
+    background: var(--glass-bg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-family: var(--font-family);
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+    color: white;
+    background: var(--accent-gradient);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* ============================================
+   History Section
+   ============================================ */
+
+.btn-refresh {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-family: var(--font-family);
+    color: var(--accent-primary);
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-refresh:hover {
+    background: rgba(99, 102, 241, 0.2);
+}
+
+.history-item {
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
+    margin-bottom: 1rem;
+    transition: all var(--transition-fast);
+}
+
+.history-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.history-item.approved {
+    border-left: 3px solid var(--success);
+}
+
+.history-item.rejected {
+    border-left: 3px solid var(--error);
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.history-topic {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1.05rem;
+}
+
+.history-status {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.25rem 0.625rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.history-status.approved {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.history-status.rejected {
+    background: var(--error-bg);
+    color: var(--error);
+}
+
+.history-meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.history-run-id {
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+}
+
+.loading-text, .no-history {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 2rem;
+    font-style: italic;
+}
+
+.error-text {
+    text-align: center;
+    color: var(--error);
+    padding: 2rem;
+}
+
+/* ============================================
+   Artifact Detail View (Expandable)
+   ============================================ */
+
+.history-expand-hint {
+    font-size: 0.75rem;
+    color: var(--accent-primary);
+    margin-top: 0.5rem;
+    opacity: 0.7;
+}
+
+.history-item:hover .history-expand-hint {
+    opacity: 1;
+}
+
+.artifact-detail {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--glass-border);
+}
+
+.artifact-detail-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.detail-section {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+}
+
+.detail-section h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    margin-bottom: 0.75rem;
+}
+
+.attempt-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid var(--accent-primary);
+}
+
+.attempt-header {
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.attempt-scores {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.mini-score {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.5rem;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+}
+
+.attempt-feedback {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.attempt-feedback ul {
+    margin: 0.25rem 0 0 1rem;
+    padding: 0;
+}
+
+.attempt-feedback code {
+    font-size: 0.7rem;
+    background: rgba(99, 102, 241, 0.15);
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    color: var(--accent-primary);
+}
+
+.detail-explanation {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-sm);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.detail-mcqs {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.75rem;
+}
+
+.detail-mcqs ol {
+    margin: 0.5rem 0 0 1rem;
+    padding: 0;
+}
+
+.detail-mcqs li {
+    margin-bottom: 0.5rem;
+}
+
+.detail-teacher-notes {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(99, 102, 241, 0.05);
+    border-radius: var(--radius-sm);
+}
+
+.detail-teacher-notes ul {
+    margin: 0.25rem 0 0 1rem;
+    padding: 0;
+}
+
+.detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.625rem;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 20px;
+    color: var(--accent-primary);
+}
+
+.detail-timestamps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}

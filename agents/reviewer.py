@@ -2,14 +2,22 @@
 Reviewer Agent - Evaluates the Generator's output.
 
 Responsibility:
-- Evaluate educational content for quality and appropriateness
-- Check age appropriateness, conceptual correctness, and clarity
-- Provide structured feedback on issues found
+- Quantitatively evaluate educational content
+- Provide scores (1-5) for age appropriateness, correctness, clarity, coverage
+- Return field-level feedback with specific issues
+- Decide pass/fail based on threshold (all scores >= 3)
 """
 
 import json
 import os
+import re
 from groq import Groq
+from pydantic import ValidationError
+
+from models.schemas import ReviewerOutput, ReviewScores, FeedbackItem
+
+# Pass threshold: all scores must be >= 3
+PASS_THRESHOLD = 3
 
 
 class ReviewerAgent:
@@ -17,21 +25,17 @@ class ReviewerAgent:
     Agent responsible for reviewing educational content.
     
     Input:
-        Content JSON from Generator Agent + grade level
+        Content dict from Generator Agent + grade level
     
     Output:
-        {
-            "status": "pass" | "fail",
-            "feedback": [
-                "Sentence 2 is too complex for Grade 4",
-                "Question 3 tests a concept not introduced"
-            ]
+        ReviewerOutput: {
+            "scores": {"age_appropriateness": 4, "correctness": 5, "clarity": 4, "coverage": 3},
+            "passed": true,
+            "feedback": [{"field": "explanation.text", "issue": "..."}]
         }
     
-    Evaluation Criteria:
-        - Age appropriateness
-        - Conceptual correctness
-        - Clarity
+    Pass Criteria:
+        All scores must be >= 3
     """
     
     def __init__(self, api_key: str = None):
@@ -46,14 +50,13 @@ class ReviewerAgent:
         Review educational content for quality and appropriateness.
         
         Args:
-            content: The generated content with 'explanation' and 'mcqs'
+            content: The generated content (GeneratorOutput format)
             grade: The target grade level
             
         Returns:
-            Dictionary with 'status' (pass/fail) and 'feedback' list
+            Dictionary with ReviewerOutput structure
         """
         if not self.client:
-            # Return mock response if no API key
             return self._review_mock_response(content, grade)
         
         return self._review_with_groq(content, grade)
@@ -65,44 +68,62 @@ class ReviewerAgent:
         
         content_json = json.dumps(content, indent=2)
         
-        prompt = f"""You are an expert educational content reviewer. Your task is to evaluate educational content created for Grade {grade} students (approximately {grade + 5} years old).
+        prompt = f"""You are an expert educational content reviewer. Your task is to quantitatively evaluate educational content created for Grade {grade} students (approximately {grade + 5} years old).
 
 CONTENT TO REVIEW:
 {content_json}
 
-EVALUATION CRITERIA:
-1. **Age Appropriateness**: 
-   - Vocabulary should match Grade {grade} level
-   - Sentence complexity should be appropriate
-   - Concepts should be understandable for this age group
+EVALUATION CRITERIA (Score 1-5 for each):
 
-2. **Conceptual Correctness**:
-   - All facts must be accurate
-   - No misconceptions or errors
-   - MCQ answers must be correct
+1. **age_appropriateness** (1-5):
+   - 5: Perfect for Grade {grade}, vocabulary and complexity ideal
+   - 4: Good, minor adjustments needed
+   - 3: Acceptable, some content may be slightly off-target
+   - 2: Significant issues with age appropriateness
+   - 1: Completely inappropriate for this grade level
 
-3. **Clarity**:
-   - Explanation should be clear and well-structured
-   - Questions should be unambiguous
-   - Options should be distinct and fair
+2. **correctness** (1-5):
+   - 5: All facts accurate, no errors
+   - 4: Minor inaccuracies
+   - 3: Some factual issues that should be addressed
+   - 2: Significant factual errors
+   - 1: Major misconceptions or wrong information
 
-REVIEW INSTRUCTIONS:
-- Be strict but fair
-- If there are significant issues, status should be "fail"
-- If content is acceptable (even if minor improvements possible), status should be "pass"
-- Provide specific, actionable feedback
+3. **clarity** (1-5):
+   - 5: Crystal clear, well-structured
+   - 4: Clear with minor improvements possible
+   - 3: Understandable but could be clearer
+   - 2: Confusing in places
+   - 1: Very difficult to understand
 
-You MUST respond with ONLY valid JSON in this exact format (no markdown, no code blocks, just raw JSON):
+4. **coverage** (1-5):
+   - 5: Comprehensive coverage of the topic
+   - 4: Good coverage, minor gaps
+   - 3: Adequate coverage
+   - 2: Significant gaps
+   - 1: Very incomplete
+
+PASS THRESHOLD: All scores must be >= {PASS_THRESHOLD}
+
+For feedback, reference specific fields using JSON paths like:
+- "explanation.text" for explanation issues
+- "mcqs[0].question" for question issues
+- "mcqs[2].correct_index" for answer issues
+- "teacher_notes.learning_objective" for teacher notes issues
+
+You MUST respond with ONLY valid JSON (no markdown, no code blocks):
 {{
-    "status": "pass" or "fail",
+    "scores": {{
+        "age_appropriateness": <1-5>,
+        "correctness": <1-5>,
+        "clarity": <1-5>,
+        "coverage": <1-5>
+    }},
+    "passed": <true if all scores >= {PASS_THRESHOLD}, else false>,
     "feedback": [
-        "Specific feedback point 1",
-        "Specific feedback point 2"
+        {{"field": "json.path.to.field", "issue": "Description of the issue"}}
     ]
 }}
-
-If the content passes, you can include positive feedback or minor suggestions.
-If the content fails, clearly explain what needs to be fixed.
 
 Review the content now:"""
 
@@ -114,7 +135,7 @@ Review the content now:"""
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.3,
-                max_tokens=1000
+                max_tokens=1500
             )
             
             result = response.choices[0].message.content.strip()
@@ -129,7 +150,24 @@ Review the content now:"""
                         result = result[4:]
                     result = result.strip()
             
-            return json.loads(result)
+            # Clean control characters
+            result = re.sub(r'[\x00-\x1f\x7f-\x9f]', ' ', result)
+            result = result.replace('\n', ' ').replace('\r', ' ').replace('\t', ' ')
+            result = re.sub(r' +', ' ', result)
+            
+            parsed = json.loads(result)
+            
+            # Validate and correct pass status based on threshold
+            scores = parsed.get("scores", {})
+            all_pass = all(
+                scores.get(k, 0) >= PASS_THRESHOLD 
+                for k in ["age_appropriateness", "correctness", "clarity", "coverage"]
+            )
+            parsed["passed"] = all_pass
+            
+            # Validate against schema
+            validated = ReviewerOutput(**parsed)
+            return validated.model_dump()
             
         except Exception as e:
             print(f"❌ Groq Reviewer API Error: {type(e).__name__}: {e}")
@@ -138,59 +176,75 @@ Review the content now:"""
     def _review_mock_response(self, content: dict, grade: int) -> dict:
         """Generate a mock review response for testing without API key."""
         
+        print(f"📝 Using mock review response")
+        
         feedback = []
-        has_issues = False
+        scores = {
+            "age_appropriateness": 4,
+            "correctness": 5,
+            "clarity": 4,
+            "coverage": 4
+        }
         
         # Check explanation length
-        explanation = content.get("explanation", "")
-        word_count = len(explanation.split())
+        explanation = content.get("explanation", {})
+        explanation_text = explanation.get("text", "") if isinstance(explanation, dict) else str(explanation)
+        word_count = len(explanation_text.split())
         
-        if word_count < 50:
-            feedback.append("Explanation is too short. Consider adding more details.")
-            has_issues = True
+        if word_count < 100:
+            scores["coverage"] = 2
+            feedback.append({
+                "field": "explanation.text",
+                "issue": "Explanation is too short. Consider adding more details and examples."
+            })
         
-        # Check if explanation matches grade level (simple heuristic)
-        avg_word_length = sum(len(word) for word in explanation.split()) / max(word_count, 1)
-        
+        # Check grade appropriateness
+        avg_word_length = sum(len(word) for word in explanation_text.split()) / max(word_count, 1)
         if grade <= 4 and avg_word_length > 6:
-            feedback.append(f"Some words may be too complex for Grade {grade}. Consider using simpler vocabulary.")
-            has_issues = True
+            scores["age_appropriateness"] = 2
+            feedback.append({
+                "field": "explanation.text",
+                "issue": f"Some words may be too complex for Grade {grade}. Consider using simpler vocabulary."
+            })
         
         # Check MCQs
         mcqs = content.get("mcqs", [])
+        if len(mcqs) < 5:
+            scores["coverage"] = min(scores["coverage"], 3)
+            feedback.append({
+                "field": "mcqs",
+                "issue": "Content should include at least 5 MCQs."
+            })
         
-        if len(mcqs) < 3:
-            feedback.append("Content should include at least 3 MCQs.")
-            has_issues = True
-        
-        for i, mcq in enumerate(mcqs, 1):
+        for i, mcq in enumerate(mcqs):
             if len(mcq.get("options", [])) != 4:
-                feedback.append(f"Question {i} should have exactly 4 options.")
-                has_issues = True
-            
-            answer = mcq.get("answer", "")
-            if answer not in ["A", "B", "C", "D"]:
-                feedback.append(f"Question {i} has an invalid answer format. Should be A, B, C, or D.")
-                has_issues = True
+                scores["correctness"] = min(scores["correctness"], 3)
+                feedback.append({
+                    "field": f"mcqs[{i}].options",
+                    "issue": f"Question {i+1} should have exactly 4 options."
+                })
         
-        # Add positive feedback if no major issues
-        if not has_issues:
-            feedback = [
-                f"Content is appropriate for Grade {grade} level.",
-                "Explanation is clear and well-structured.",
-                "MCQs are well-formed and test relevant concepts."
-            ]
+        # Check teacher notes
+        teacher_notes = content.get("teacher_notes", {})
+        if not teacher_notes.get("learning_objective"):
+            scores["coverage"] = min(scores["coverage"], 3)
+            feedback.append({
+                "field": "teacher_notes.learning_objective",
+                "issue": "Learning objective is missing."
+            })
         
-        # Randomly fail first attempt for demo purposes (to show refinement)
-        import random
-        if not has_issues and random.random() < 0.3:  # 30% chance to fail for demo
-            has_issues = True
+        # Determine pass/fail
+        all_pass = all(s >= PASS_THRESHOLD for s in scores.values())
+        
+        # Add positive feedback if passing
+        if all_pass and not feedback:
             feedback = [
-                f"Some vocabulary might be slightly advanced for Grade {grade}.",
-                "Consider adding a real-world example to make the concept more relatable."
+                {"field": "explanation.text", "issue": "Content is well-structured and appropriate."},
+                {"field": "mcqs", "issue": "MCQs effectively test the concepts covered."}
             ]
         
         return {
-            "status": "fail" if has_issues else "pass",
+            "scores": scores,
+            "passed": all_pass,
             "feedback": feedback
         }
