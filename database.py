@@ -7,30 +7,41 @@ Uses DATABASE_URL environment variable to detect which database to use.
 
 import os
 import json
+import sqlite3
 from datetime import datetime
 from typing import List, Optional
-from urllib.parse import urlparse
 
 
 # Check for PostgreSQL connection string
 DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL")
+USE_POSTGRES = bool(DATABASE_URL)
 
-if DATABASE_URL:
-    # PostgreSQL mode
-    import psycopg2
-    from psycopg2.extras import RealDictCursor
-    USE_POSTGRES = True
-    print("✅ Using PostgreSQL database")
-else:
-    # SQLite mode (local development)
-    import sqlite3
-    USE_POSTGRES = False
-    DATABASE_PATH = os.path.join(os.path.dirname(__file__), 'run_history.db')
+# SQLite path for local development
+DATABASE_PATH = os.path.join(os.path.dirname(__file__), 'run_history.db')
+
+# PostgreSQL imports (lazy loaded only when needed)
+psycopg2 = None
+RealDictCursor = None
+
+if USE_POSTGRES:
+    try:
+        import psycopg2 as pg
+        from psycopg2.extras import RealDictCursor as RDC
+        psycopg2 = pg
+        RealDictCursor = RDC
+        print("✅ Using PostgreSQL database")
+    except ImportError:
+        print("⚠️ psycopg2 not installed, falling back to SQLite")
+        USE_POSTGRES = False
+
+if not USE_POSTGRES:
     print("✅ Using SQLite database (local)")
 
 
 def get_postgres_connection():
     """Get PostgreSQL connection."""
+    if not psycopg2:
+        raise RuntimeError("PostgreSQL driver not available")
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     return conn
 
