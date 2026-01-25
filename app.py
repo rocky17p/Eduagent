@@ -13,13 +13,16 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 
 from orchestrator import Orchestrator
-import database
+from database import ensure_db_initialized
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__, static_folder='static')
 CORS(app)
+
+# Initialize database 
+ensure_db_initialized()
 
 # Initialize orchestrator
 api_key = os.getenv("GROQ_API_KEY")

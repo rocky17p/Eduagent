@@ -322,5 +322,15 @@ def _dict_to_artifact(row: dict) -> dict:
     }
 
 
-# Initialize database on import
-init_db()
+
+
+# Track if database has been initialized
+_db_initialized = False
+
+def ensure_db_initialized():
+    """Ensure database is initialized (call this before any DB operation)."""
+    global _db_initialized
+    if not _db_initialized:
+        init_db()
+        _db_initialized = True
+
