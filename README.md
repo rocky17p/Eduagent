@@ -2,13 +2,15 @@
 
 An AI-powered educational content generation system with a governed, auditable pipeline featuring schema validation, quantitative review, and complete audit trails.
 
+**Live Demo:** [https://eklavya-eduagent.vercel.app](https://eklavya-eduagent.vercel.app)
+
 ## 🎯 Features
 
 - **Schema-Validated Outputs**: All agent outputs validated via Pydantic
 - **Quantitative Review**: Scores (1-5) for age appropriateness, correctness, clarity, coverage
 - **Bounded Refinement**: Maximum 2 refinement attempts before rejection
 - **Complete Audit Trail**: Every run produces a RunArtifact with full lifecycle
-- **SQLite Persistence**: All runs stored with inputs, attempts, and final decisions
+- **PostgreSQL Persistence**: All runs stored in Neon PostgreSQL
 - **Testable Architecture**: 3 mandatory tests included
 
 ## 🔄 Agent Pipeline
@@ -60,10 +62,14 @@ An AI-powered educational content generation system with a governed, auditable p
 }
 ```
 
-**Pass Criteria**: All scores must be >= 3
+**Pass Threshold**: All scores must be ≥ 3
 
 ### 3. Refiner Agent
-**Responsibility**: Improve content using reviewer feedback (max 2 attempts).
+**Responsibility**: Improve content using reviewer feedback.
+
+- Maximum 2 refinement attempts
+- Each attempt is logged in the audit trail
+- If still failing after max attempts → rejected
 
 ### 4. Tagger Agent
 **Responsibility**: Classify approved content only.
@@ -73,7 +79,6 @@ An AI-powered educational content generation system with a governed, auditable p
 {
   "subject": "Mathematics",
   "topic": "Fractions",
-  "grade": 5,
   "difficulty": "Medium",
   "content_type": ["Explanation", "Quiz"],
   "blooms_level": "Understanding"
@@ -82,85 +87,93 @@ An AI-powered educational content generation system with a governed, auditable p
 
 ## 📊 RunArtifact (Audit Trail)
 
-Every run produces:
+Every pipeline run produces a complete audit trail:
+
 ```json
 {
   "run_id": "uuid",
   "input": {"grade": 5, "topic": "Fractions"},
   "attempts": [
-    {"attempt": 1, "draft": {...}, "review": {...}},
-    {"attempt": 2, "draft": {...}, "review": {...}}
+    {"attempt": 1, "draft": {...}, "review": {...}}
   ],
   "final": {
-    "status": "approved|rejected",
+    "status": "approved | rejected",
     "content": {...},
     "tags": {...}
   },
-  "timestamps": {"started_at": "...", "finished_at": "..."}
+  "timestamps": {
+    "started_at": "2026-01-25T15:00:00Z",
+    "finished_at": "2026-01-25T15:01:30Z"
+  }
 }
 ```
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.8+
-- Groq API key (free at https://console.groq.com/keys)
+- Python 3.10+
+- PostgreSQL database (Neon, Supabase, or Vercel Postgres)
+- Groq API key
 
 ### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/rocky17p/Eklavya.git
+cd Eklavya
+
+# Install dependencies
 pip install -r requirements.txt
 
-# Copy and configure environment
+# Set up environment variables
 cp .env.example .env
-# Edit .env and add your GROQ_API_KEY
+# Edit .env with your GROQ_API_KEY and DATABASE_URL
 
 # Run the application
 python app.py
 ```
 
-Open http://localhost:5000
-
 ## 📁 Project Structure
 
 ```
 eklavya/
-├── app.py                 # Flask API server
-├── orchestrator.py        # Pipeline orchestration
-├── database.py            # SQLite persistence
-├── requirements.txt       # Dependencies
-├── .env.example           # Environment template
-├── models/
-│   └── schemas.py         # Pydantic schemas
+├── app.py              # Flask application & API routes
+├── orchestrator.py     # Pipeline orchestration logic
+├── database.py         # PostgreSQL persistence
 ├── agents/
-│   ├── generator.py       # Generator Agent
-│   ├── reviewer.py        # Reviewer Agent
-│   ├── refiner.py         # Refiner Agent
-│   └── tagger.py          # Tagger Agent
-├── tests/
-│   └── test_pipeline.py   # 3 mandatory tests
-└── static/                # Web UI
+│   ├── generator.py    # Content generation agent
+│   ├── reviewer.py     # Quality review agent
+│   ├── refiner.py      # Content refinement agent
+│   └── tagger.py       # Content classification agent
+├── models/
+│   └── schemas.py      # Pydantic validation schemas
+├── api/
+│   └── index.py        # Vercel serverless entry point
+├── static/             # Frontend UI files
+├── tests/              # Test suite
+├── vercel.json         # Vercel deployment config
+└── requirements.txt    # Python dependencies
 ```
 
 ## 📚 API Reference
 
-### POST /generate
-Run the full pipeline.
+### POST /api/generate
+Run the full pipeline and generate educational content.
 
 **Request:**
 ```json
 {"grade": 5, "topic": "Fractions", "user_id": "optional"}
 ```
 
-**Response:** Complete RunArtifact
+**Response:** Complete RunArtifact with audit trail
 
-### GET /history
-Retrieve run history.
+### GET /api/history
+Retrieve run history from the database.
 
 **Query Params:** `user_id`, `limit`
 
-### GET /run/{run_id}
-Retrieve specific run artifact.
+### GET /api/run/{run_id}
+Retrieve a specific run artifact by ID.
 
 ## 🧪 Running Tests
 
@@ -176,47 +189,25 @@ pytest tests/ -v
 ## ⚖️ Trade-offs
 
 1. **Flask over FastAPI**: Kept Flask for consistency with Part 1
-2. **SQLite + PostgreSQL**: SQLite for local dev, PostgreSQL for production
+2. **PostgreSQL only**: Simpler deployment, consistent behavior locally and on Vercel
 3. **Max 2 refinements**: Prevents infinite loops while allowing improvement
 4. **Field-level feedback**: More actionable than general comments
 
 ## 🚀 Vercel Deployment
 
-### Step 1: Get a Free PostgreSQL Database
+The application is deployed on Vercel with PostgreSQL (Neon).
 
-Choose one of these free options:
+### Environment Variables Required
 
-- **Neon** (recommended): https://neon.tech - Free tier with 512MB
-- **Supabase**: https://supabase.com - Free tier with 500MB
-- **Vercel Postgres**: https://vercel.com/docs/storage/vercel-postgres
+In Vercel dashboard, add:
+- `GROQ_API_KEY` - Your Groq API key
+- `DATABASE_URL` - PostgreSQL connection string
 
-### Step 2: Set Environment Variables
-
-In Vercel dashboard, add these environment variables:
-
-```
-GROQ_API_KEY=your_groq_api_key
-DATABASE_URL=postgres://user:password@host:5432/database
-```
-
-### Step 3: Deploy
+### Deploy Your Own
 
 ```bash
-# Install Vercel CLI
 npm i -g vercel
-
-# Deploy
 vercel
-
-# Follow prompts to link your project
 ```
-
-### Step 4: Connect Database (if using Vercel Postgres)
-
-```bash
-vercel env pull .env.local
-```
-
 ## 📄 License
-
 MIT License
