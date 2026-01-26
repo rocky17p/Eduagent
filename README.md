@@ -211,3 +211,5 @@ vercel
 ```
 ## 📄 License
 MIT License
+
+This project was developed by Rishi as part of an internship technical assessment on 26/1/26.
