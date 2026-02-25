@@ -2,7 +2,7 @@
 
 An AI-powered educational content generation system with a governed, auditable pipeline featuring schema validation, quantitative review, and complete audit trails.
 
-**Live Demo:** [https://eklavya-eduagent.vercel.app](https://eklavya-eduagent.vercel.app)
+**Live Demo:** [https://eklavya-eduagent.vercel.app](https://eduagent.rishipatwa.me)
 
 ## 🎯 Features
 
