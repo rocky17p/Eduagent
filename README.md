@@ -1,8 +1,8 @@
-# EduGen AI - Educational Content Generator (Part 2)
+# EduAgent - Educational Content Generator
 
 An AI-powered educational content generation system with a governed, auditable pipeline featuring schema validation, quantitative review, and complete audit trails.
 
-**Live Demo:** [https://eklavya-eduagent.vercel.app](https://eduagent.rishipatwa.me)
+**Live Demo:** [https://eduagent.rishipatwa.me](https://eduagent.rishipatwa.me)
 
 ## 🎯 Features
 
@@ -119,8 +119,8 @@ Every pipeline run produces a complete audit trail:
 
 ```bash
 # Clone the repository
-git clone https://github.com/rocky17p/Eklavya.git
-cd Eklavya
+git clone https://github.com/rocky17p/Eduagent.git
+cd Eduagent
 
 # Install dependencies
 pip install -r requirements.txt
@@ -136,7 +136,7 @@ python app.py
 ## 📁 Project Structure
 
 ```
-eklavya/
+eduagent/
 ├── app.py              # Flask application & API routes
 ├── orchestrator.py     # Pipeline orchestration logic
 ├── database.py         # PostgreSQL persistence
@@ -147,8 +147,6 @@ eklavya/
 │   └── tagger.py       # Content classification agent
 ├── models/
 │   └── schemas.py      # Pydantic validation schemas
-├── api/
-│   └── index.py        # Vercel serverless entry point
 ├── static/             # Frontend UI files
 ├── tests/              # Test suite
 ├── vercel.json         # Vercel deployment config
@@ -188,10 +186,9 @@ pytest tests/ -v
 
 ## ⚖️ Trade-offs
 
-1. **Flask over FastAPI**: Kept Flask for consistency with Part 1
-2. **PostgreSQL only**: Simpler deployment, consistent behavior locally and on Vercel
-3. **Max 2 refinements**: Prevents infinite loops while allowing improvement
-4. **Field-level feedback**: More actionable than general comments
+1. **PostgreSQL only**: Simpler deployment, consistent behavior locally and on Vercel
+2. **Max 2 refinements**: Prevents infinite loops while allowing improvement
+3. **Field-level feedback**: More actionable than general comments
 
 ## 🚀 Vercel Deployment
 
@@ -209,7 +206,8 @@ In Vercel dashboard, add:
 npm i -g vercel
 vercel
 ```
+
 ## 📄 License
 MIT License
 
-This project was developed by Rishi as part of an internship technical assessment on 26/1/26.
+This project was developed by Rishi.
