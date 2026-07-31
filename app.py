@@ -16,7 +16,7 @@ from database import ensure_db_initialized, get_history, get_run_artifact
 # Load environment variables
 load_dotenv()
 
-app = Flask(__name__, static_folder='static')
+app = Flask(__name__, static_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static'))
 CORS(app)
 
 # Initialize database 
