@@ -30,13 +30,13 @@ orchestrator = Orchestrator(api_key=api_key)
 @app.route('/')
 def index():
     """Serve the main UI."""
-    return send_from_directory('static', 'index.html')
+    return send_from_directory(app.static_folder, 'index.html')
 
 
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     """Serve static files."""
-    return send_from_directory('static', filename)
+    return send_from_directory(app.static_folder, filename)
 
 
 @app.route('/api/health', methods=['GET'])
