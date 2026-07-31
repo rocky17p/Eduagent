@@ -355,7 +355,7 @@ const scrollObserver = new IntersectionObserver((entries) => {
 fetch('/api/health')
     .then(res => res.json())
     .then(health => {
-        console.log('🎓 EduGen AI Part 2 - Health Check:', health);
+        console.log('🎓 EduAgent - Health Check:', health);
         if (!health.has_api_key) {
             console.log('ℹ️ Running with mock responses (no API key)');
         }
