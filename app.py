@@ -1,10 +1,8 @@
 """
-AI Educational Content Generator - Flask Application
+EduAgent - Flask Application
 
 Main application that orchestrates the Generator, Reviewer, Refiner, and Tagger agents
 with a web UI to trigger and display the agent pipeline.
-
-Part 2: Governed, Auditable AI Content Pipeline
 """
 
 import os
@@ -102,11 +100,9 @@ def generate():
         # Run the orchestrator pipeline
         artifact = orchestrator.run(grade, topic, user_id)
         
-        # Also return legacy format for UI compatibility
         response = {
             'success': True,
             'run_artifact': artifact,
-            # Legacy fields for backward compatibility with Part 1 UI
             'generator_output': artifact['attempts'][0]['draft'] if artifact['attempts'] else None,
             'reviewer_output': artifact['attempts'][0]['review'] if artifact['attempts'] else None,
             'refined_output': None,
@@ -192,7 +188,7 @@ def get_run(run_id):
 
 if __name__ == '__main__':
     print("=" * 60)
-    print("AI Educational Content Generator - Part 2")
+    print("EduAgent")
     print("=" * 60)
     if api_key:
         print("✓ Groq API key detected")
