@@ -150,7 +150,7 @@ Generate the content now:"""
 
         try:
             response = self.client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model="openai/gpt-oss-120b",
                 messages=[
                     {"role": "system", "content": "You are an educational content generator. Always respond with valid JSON only, no markdown. Ensure all string values are on a single line with no newline characters inside strings."},
                     {"role": "user", "content": prompt}

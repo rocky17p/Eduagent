@@ -112,7 +112,7 @@ Classify the content now:"""
 
         try:
             response = self.client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model="openai/gpt-oss-120b",
                 messages=[
                     {"role": "system", "content": "You are an educational content classifier. Always respond with valid JSON only."},
                     {"role": "user", "content": prompt}
