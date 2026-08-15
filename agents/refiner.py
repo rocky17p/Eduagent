@@ -114,7 +114,7 @@ Provide the refined content now:"""
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.5,
-                max_tokens=3000
+                max_tokens=4000
             )
             
             content = response.choices[0].message.content.strip()
