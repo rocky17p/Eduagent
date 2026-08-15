@@ -73,6 +73,21 @@ function getExplanationText(explanation) {
 }
 
 /**
+ * Render explanation text as proper paragraphs (splits on \n\n)
+ */
+function renderExplanation(container, explanation) {
+    const text = getExplanationText(explanation);
+    const paragraphs = text.split(/\n\n+/).map(p => p.trim()).filter(Boolean);
+    if (paragraphs.length > 1) {
+        container.innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
+    } else {
+        // Fallback: split on "Paragraph N:" labels if old content
+        const labeled = text.split(/Paragraph \d+:\s*/i).map(p => p.trim()).filter(Boolean);
+        container.innerHTML = labeled.map(p => `<p>${p}</p>`).join('');
+    }
+}
+
+/**
  * Render MCQs as cards (handles both old and new schema)
  */
 function renderMCQs(mcqs, container) {
@@ -198,7 +213,7 @@ async function displayGeneratorOutput(data, container = null) {
     }
     
     // Handle new explanation schema
-    expContainer.textContent = getExplanationText(data.explanation);
+    renderExplanation(expContainer, data.explanation);
     renderMCQs(data.mcqs || [], mcqContainer);
     
     // Add teacher notes if present
@@ -258,7 +273,7 @@ async function displayRefinedOutput(data) {
     
     // Show refined section
     refinedSection.style.display = 'block';
-    refinedExplanationContent.textContent = getExplanationText(data.explanation);
+    renderExplanation(refinedExplanationContent, data.explanation);
     renderMCQs(data.mcqs || [], refinedMcqsContent);
 }
 

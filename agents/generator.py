@@ -107,7 +107,7 @@ Requirements:
 You MUST respond with ONLY valid JSON in this exact format (no markdown, no code blocks, just raw JSON):
 {{
     "explanation": {{
-        "text": "A detailed, age-appropriate explanation of the topic with examples and key facts. Write at least 5 full paragraphs (minimum 250 words). Cover multiple aspects of the topic in depth. No newlines inside the string.",
+        "text": "A detailed, age-appropriate explanation. Write at least 5 full paragraphs (minimum 250 words). Separate paragraphs with \\n\\n. Do NOT label paragraphs with 'Paragraph 1:' or any numbering. Just write flowing prose.",
         "grade": {grade}
     }},
     "mcqs": [
@@ -152,7 +152,7 @@ Generate the content now:"""
             response = self.client.chat.completions.create(
                 model="openai/gpt-oss-120b",
                 messages=[
-                    {"role": "system", "content": "You are an educational content generator. Always respond with valid JSON only, no markdown. Ensure all string values are on a single line with no newline characters inside strings."},
+                    {"role": "system", "content": "You are an educational content generator. Always respond with valid JSON only, no markdown. In the explanation text field, separate paragraphs using \\n\\n. Do NOT label paragraphs with 'Paragraph 1:', 'Paragraph 2:' etc. Write natural flowing prose."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.7,
@@ -171,10 +171,24 @@ Generate the content now:"""
                         content = content[4:]
                     content = content.strip()
             
-            # Clean up control characters
-            content = re.sub(r'[\x00-\x1f\x7f-\x9f]', ' ', content)
-            content = content.replace('\n', ' ').replace('\r', ' ').replace('\t', ' ')
+            # Preserve explanation text before stripping newlines from JSON structure
+            import re as _re
+            # Extract and protect the explanation text
+            exp_match = _re.search(r'"text"\s*:\s*"((?:[^"\\]|\\.)*)"', content)
+            protected_text = None
+            placeholder = "__EXPLANATION_PLACEHOLDER__"
+            if exp_match:
+                protected_text = exp_match.group(1)
+                content = content[:exp_match.start(1)] + placeholder + content[exp_match.end(1):]
+
+            # Clean up control characters from JSON structure
+            content = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]', ' ', content)
+            content = content.replace('\r', ' ').replace('\t', ' ')
             content = re.sub(r' +', ' ', content)
+
+            # Restore the explanation text
+            if protected_text is not None:
+                content = content.replace(placeholder, protected_text, 1)
             
             return json.loads(content)
             
