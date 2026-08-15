@@ -100,14 +100,14 @@ Requirements:
 1. Language MUST be appropriate for Grade {grade} students (age ~{grade + 5} years)
 2. Use simple vocabulary and short sentences for lower grades
 3. Concepts must be factually correct
-4. Create a DETAILED and engaging explanation (4-6 paragraphs with key facts and examples)
+4. Create a DETAILED and engaging explanation with AT LEAST 5 full paragraphs and a MINIMUM of 250 words. Each paragraph must cover a distinct concept with examples and key facts. Do NOT summarize briefly.
 5. Generate exactly 5 multiple choice questions (MCQs) that TEST CONCEPTS FROM YOUR EXPLANATION
 6. Include teacher notes with learning objectives and common misconceptions
 
 You MUST respond with ONLY valid JSON in this exact format (no markdown, no code blocks, just raw JSON):
 {{
     "explanation": {{
-        "text": "A detailed, age-appropriate explanation of the topic with examples and key facts (4-6 paragraphs, no newlines inside string)",
+        "text": "A detailed, age-appropriate explanation of the topic with examples and key facts. Write at least 5 full paragraphs (minimum 250 words). Cover multiple aspects of the topic in depth. No newlines inside the string.",
         "grade": {grade}
     }},
     "mcqs": [
@@ -156,7 +156,7 @@ Generate the content now:"""
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.7,
-                max_tokens=3000
+                max_tokens=4000
             )
             
             content = response.choices[0].message.content.strip()
