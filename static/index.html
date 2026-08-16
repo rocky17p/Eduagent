@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Educational Content Generator</title>
     <meta name="description" content="Generate grade-appropriate educational content using AI agents">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="background-gradient"></div>
-    
+
     <div class="container">
         <!-- Header -->
         <header class="header">
@@ -58,7 +61,8 @@
                     </div>
                     <div class="form-group">
                         <label for="topic">Topic</label>
-                        <input type="text" id="topic" name="topic" placeholder="e.g., Types of angles" value="Types of angles" required>
+                        <input type="text" id="topic" name="topic" placeholder="e.g., Types of angles"
+                            value="Types of angles" required>
                     </div>
                     <button type="submit" class="btn-generate" id="generateBtn">
                         <span class="btn-text">Generate Content</span>
@@ -87,12 +91,12 @@
                     </h2>
                     <span class="status-badge" id="generatorStatus">Initial Draft</span>
                 </div>
-                
+
                 <div class="content-block">
                     <h3>📚 Explanation</h3>
                     <div class="explanation-content" id="explanationContent"></div>
                 </div>
-                
+
                 <div class="content-block">
                     <h3>📝 Multiple Choice Questions</h3>
                     <div class="mcqs-container" id="mcqsContent"></div>
@@ -116,7 +120,7 @@
                     </h2>
                     <span class="status-badge" id="reviewerStatusBadge">Evaluating</span>
                 </div>
-                
+
                 <div class="review-status" id="reviewStatus"></div>
                 <div class="feedback-list" id="feedbackContent"></div>
             </section>
@@ -139,12 +143,12 @@
                     </h2>
                     <span class="status-badge refined-badge">Improved</span>
                 </div>
-                
+
                 <div class="content-block">
                     <h3>📚 Refined Explanation</h3>
                     <div class="explanation-content" id="refinedExplanationContent"></div>
                 </div>
-                
+
                 <div class="content-block">
                     <h3>📝 Refined MCQs</h3>
                     <div class="mcqs-container" id="refinedMcqsContent"></div>
@@ -182,4 +186,5 @@
 
     <script src="/static/script.js"></script>
 </body>
+
 </html>
