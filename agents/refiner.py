@@ -108,7 +108,7 @@ Provide the refined content now:"""
 
         try:
             response = self.client.chat.completions.create(
-                model="openai/gpt-oss-120b",
+                model="qwen/qwen3.8-27b",
                 messages=[
                     {"role": "system", "content": "You are an educational content refiner. Always respond with valid JSON only, no markdown."},
                     {"role": "user", "content": prompt}
