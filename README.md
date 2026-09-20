@@ -160,7 +160,7 @@ Run the full pipeline and generate educational content.
 
 **Request:**
 ```json
-{"grade": 5, "topic": "Fractions", "user_id": "optional"}
+{"grade": 5, "topic": "Fractions"}
 ```
 
 **Response:** Complete RunArtifact with audit trail
@@ -168,7 +168,7 @@ Run the full pipeline and generate educational content.
 ### GET /api/history
 Retrieve run history from the database.
 
-**Query Params:** `user_id`, `limit`
+**Query Params:** `limit`
 
 ### GET /api/run/{run_id}
 Retrieve a specific run artifact by ID.

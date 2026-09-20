@@ -57,8 +57,7 @@ def generate():
     Request Body:
         {
             "grade": 5,
-            "topic": "Fractions as parts of a whole",
-            "user_id": "optional-user-id"
+            "topic": "Fractions as parts of a whole"
         }
     
     Response:
@@ -75,7 +74,6 @@ def generate():
         
         grade = data.get('grade')
         topic = data.get('topic')
-        user_id = data.get('user_id')
         
         if not grade or not topic:
             return jsonify({
@@ -98,7 +96,7 @@ def generate():
             }), 400
         
         # Run the orchestrator pipeline
-        artifact = orchestrator.run(grade, topic, user_id)
+        artifact = orchestrator.run(grade, topic)
         
         response = {
             'success': True,
@@ -130,17 +128,15 @@ def api_get_history():
     Retrieve run history.
     
     Query Parameters:
-        user_id: Optional user identifier to filter by
         limit: Maximum records to return (default 50)
     
     Response:
         List of RunArtifact summaries
     """
     try:
-        user_id = request.args.get('user_id')
         limit = request.args.get('limit', 50, type=int)
         
-        artifacts = get_history(user_id, limit)
+        artifacts = get_history(limit)
         
         return jsonify({
             'success': True,

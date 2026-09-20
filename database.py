@@ -52,9 +52,6 @@ def init_db():
     ''')
     
     cursor.execute('''
-        CREATE INDEX IF NOT EXISTS idx_user_id ON run_artifacts(user_id)
-    ''')
-    cursor.execute('''
         CREATE INDEX IF NOT EXISTS idx_run_id ON run_artifacts(run_id)
     ''')
     
@@ -65,7 +62,7 @@ def init_db():
     print("✅ Database initialized")
 
 
-def save_run_artifact(artifact: dict, user_id: str = None) -> str:
+def save_run_artifact(artifact: dict) -> str:
     """Save a RunArtifact to the database."""
     run_id = artifact.get('run_id')
     input_data = artifact.get('input', {})
@@ -77,10 +74,10 @@ def save_run_artifact(artifact: dict, user_id: str = None) -> str:
     
     cursor.execute('''
         INSERT INTO run_artifacts (
-            run_id, user_id, input_grade, input_topic,
+            run_id, input_grade, input_topic,
             attempts_json, final_status, final_content_json,
             final_tags_json, started_at, finished_at
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT (run_id) DO UPDATE SET
             attempts_json = EXCLUDED.attempts_json,
             final_status = EXCLUDED.final_status,
@@ -89,7 +86,6 @@ def save_run_artifact(artifact: dict, user_id: str = None) -> str:
             finished_at = EXCLUDED.finished_at
     ''', (
         run_id,
-        user_id,
         input_data.get('grade'),
         input_data.get('topic'),
         json.dumps(artifact.get('attempts', [])),
@@ -114,7 +110,7 @@ def get_run_artifact(run_id: str) -> Optional[dict]:
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     
     cursor.execute('''
-        SELECT run_id, user_id, input_grade, input_topic,
+        SELECT run_id, input_grade, input_topic,
                attempts_json, final_status, final_content_json,
                final_tags_json, started_at, finished_at
         FROM run_artifacts WHERE run_id = %s
@@ -129,30 +125,19 @@ def get_run_artifact(run_id: str) -> Optional[dict]:
     return _row_to_artifact(row)
 
 
-def get_history(user_id: str = None, limit: int = 50) -> List[dict]:
-    """Retrieve run history, optionally filtered by user_id."""
+def get_history(limit: int = 50) -> List[dict]:
+    """Retrieve run history."""
     conn = get_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     
-    if user_id:
-        cursor.execute('''
-            SELECT run_id, user_id, input_grade, input_topic,
-                   attempts_json, final_status, final_content_json,
-                   final_tags_json, started_at, finished_at
-            FROM run_artifacts 
-            WHERE user_id = %s
-            ORDER BY created_at DESC
-            LIMIT %s
-        ''', (user_id, limit))
-    else:
-        cursor.execute('''
-            SELECT run_id, user_id, input_grade, input_topic,
-                   attempts_json, final_status, final_content_json,
-                   final_tags_json, started_at, finished_at
-            FROM run_artifacts 
-            ORDER BY created_at DESC
-            LIMIT %s
-        ''', (limit,))
+    cursor.execute('''
+        SELECT run_id, input_grade, input_topic,
+               attempts_json, final_status, final_content_json,
+               final_tags_json, started_at, finished_at
+        FROM run_artifacts 
+        ORDER BY created_at DESC
+        LIMIT %s
+    ''', (limit,))
     
     rows = cursor.fetchall()
     cursor.close()
@@ -165,7 +150,6 @@ def _row_to_artifact(row: dict) -> dict:
     """Convert a PostgreSQL dict row to a RunArtifact dictionary."""
     return {
         'run_id': row['run_id'],
-        'user_id': row['user_id'],
         'input': {
             'grade': row['input_grade'],
             'topic': row['input_topic']

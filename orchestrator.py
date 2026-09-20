@@ -41,14 +41,13 @@ class Orchestrator:
         self.refiner = RefinerAgent(api_key=api_key)
         self.tagger = TaggerAgent(api_key=api_key)
     
-    def run(self, grade: int, topic: str, user_id: str = None) -> dict:
+    def run(self, grade: int, topic: str) -> dict:
         """
         Run the complete content generation pipeline.
         
         Args:
             grade: Target grade level (1-12)
             topic: Educational topic
-            user_id: Optional user identifier for history
             
         Returns:
             Complete RunArtifact with audit trail
@@ -182,7 +181,7 @@ class Orchestrator:
         }
         
         # Save to database
-        database.save_run_artifact(artifact, user_id)
+        database.save_run_artifact(artifact)
         
         print(f"\n{'='*60}")
         print(f"📊 Run {run_id} completed")
